@@ -115,6 +115,15 @@ def _inject_css():
                 [data-testid="stFileUploader"]>div {
                     background: var(--panel); border: 1px dashed var(--border); padding: 12px; border-radius: 12px;
                 }
+                /* Uploaded filenames and labels in black */
+                [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"],
+                [data-testid="stFileUploader"] .uploadedFileName,
+                [data-testid="stFileUploader"] .stUploadedFileLabel,
+                [data-testid="stFileUploader"] li,
+                [data-testid="stFileUploader"] p,
+                [data-testid="stFileUploader"] span {
+                    color: #111827 !important;
+                }
                 /* Make the 'Browse files' button text white */
                 [data-testid="stFileUploader"] button {
                     color: #ffffff !important;
