@@ -243,8 +243,11 @@ def stream_process_and_logs(inicio: date, fim: date):
         try:
             # st is already imported at module top
             api_key = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_api_key")
+            if not api_key:
+                nested = st.secrets.get("secrets")
+                if nested and isinstance(nested, dict):
+                    api_key = nested.get("GEMINI_API_KEY") or nested.get("gemini_api_key")
         except Exception:
-            # Older Streamlit or nested secrets; ignore here (vr_agent still has other fallbacks)
             api_key = None
         if api_key:
             env["GEMINI_API_KEY"] = str(api_key)

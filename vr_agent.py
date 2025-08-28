@@ -1113,6 +1113,11 @@ def _load_gemini_api_key() -> Optional[str]:
         try:
             # st.secrets behaves like a dict; .get works
             v = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_api_key")
+            # Some users paste a TOML with a [secrets] header; accept nested
+            if not v:
+                nested = st.secrets.get("secrets")
+                if nested and isinstance(nested, dict):
+                    v = nested.get("GEMINI_API_KEY") or nested.get("gemini_api_key")
         except Exception:
             # Older Streamlit versions may require direct indexing or behave differently
             try:
