@@ -235,6 +235,22 @@ def stream_process_and_logs(inicio: date, fim: date):
     script = os.path.join(BASE_DIR, "consolidar_bases.py")
     args = [py, script, "--inicio", inicio.isoformat(), "--fim", fim.isoformat()]
 
+    # Ensure GEMINI_API_KEY is available to the child process (Streamlit Cloud secrets don't
+    # automatically propagate to subprocesses). If present, inject into env.
+    env = os.environ.copy()
+    try:
+        api_key = None
+        try:
+            # st is already imported at module top
+            api_key = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_api_key")
+        except Exception:
+            # Older Streamlit or nested secrets; ignore here (vr_agent still has other fallbacks)
+            api_key = None
+        if api_key:
+            env["GEMINI_API_KEY"] = str(api_key)
+    except Exception:
+        pass
+
     # Prepare run.log tailing (binary safe)
     log_pos = 0
     if os.path.exists(RUN_LOG_PATH):
@@ -255,6 +271,7 @@ def stream_process_and_logs(inicio: date, fim: date):
         universal_newlines=True,
         encoding="utf-8",
         errors="replace",
+    env=env,
     )
     # Progress UI
     progress = st.progress(0.0)

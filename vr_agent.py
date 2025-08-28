@@ -1114,14 +1114,14 @@ def _load_gemini_api_key() -> Optional[str]:
             # st.secrets behaves like a dict; .get works
             v = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_api_key")
         except Exception:
-            # Older Streamlit versions may require indexing
-            for k in ("GEMINI_API_KEY", "gemini_api_key"):
-                try:
+            # Older Streamlit versions may require direct indexing or behave differently
+            try:
+                for k in ("GEMINI_API_KEY", "gemini_api_key"):
                     if k in st.secrets and st.secrets[k]:
                         v = st.secrets[k]
                         break
-                except Exception:
-                    pass
+            except Exception:
+                v = None
         if v:
             return str(v).strip()
     except Exception:
@@ -1199,10 +1199,12 @@ def build_agent(tools: Optional[List] = None):
     # Resolve API key from Streamlit secrets first, then env/.env/txt
     api_key = _load_gemini_api_key()
     if not api_key:
-        raise RuntimeError(
-            "GEMINI_API_KEY ausente. Defina nos secrets do Streamlit Community Cloud (st.secrets), "
-            "ou via variável de ambiente/.env; como último recurso, use gemini_api_key.txt no diretório do projeto."
+        hint = (
+            "GEMINI_API_KEY ausente. Defina em st.secrets (Cloud) ou variável de ambiente/.env. "
+            "Dica: no Streamlit Cloud, vá em App Settings > Edit secrets e adicione\n"
+            "GEMINI_API_KEY = \"sua_chave\""
         )
+        raise RuntimeError(hint)
 
     llm = ChatGoogleGenerativeAI(
         model="gemini-1.5-pro",
